@@ -1,0 +1,43 @@
+---
+// A looping sprite strip from public/sprites (see tools/build_site_assets.py).
+import sprites from "../lib/sprites.json";
+
+interface Props {
+  name: string;
+  /** Strip file (defaults to `name`), e.g. "galleon_red". */
+  file?: string;
+  scale?: number;
+  still?: boolean;
+  delay?: number;
+  class?: string;
+  label?: string;
+  /** Ship strips: heading index 0..31 (0 = east, counter-clockwise) shown still. */
+  heading?: number;
+}
+const { name, file = name, scale = 3, still = false, delay = 0, class: cls = "", label, heading = 0 } = Astro.props;
+type Meta = { w: number; h: number; frames?: number; fps?: number; headings?: number; sinking?: { frames: number; fps: number } };
+const meta = (sprites as Record<string, Meta>)[name];
+const sinking = file.endsWith("_sinking") && meta.sinking;
+const n = sinking ? meta.sinking!.frames : (meta.headings ?? meta.frames ?? 1);
+const fps = sinking ? meta.sinking!.fps : (meta.fps || 1);
+const isStill = still || n === 1 || (meta.headings !== undefined && !sinking);
+const dur = n / fps;
+const style = [
+  `--w:${meta.w}px`,
+  `--h:${meta.h}px`,
+  `--n:${n}`,
+  `--s:${scale}`,
+  `--dur:${dur}s`,
+  `--delay:${delay}s`,
+  `background-image:url(${import.meta.env.BASE_URL}sprites/${file}.png)`,
+  isStill ? `background-position-x:calc(${-heading} * var(--w) * var(--s))` : "",
+].join(";");
+---
+
+<span
+  class:list={["sprite", cls]}
+  style={style}
+  data-still={isStill ? "" : undefined}
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}></span>

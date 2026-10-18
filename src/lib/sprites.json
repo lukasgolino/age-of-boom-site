@@ -1,0 +1,164 @@
+{
+  "brig": {
+    "h": 54,
+    "headings": 32,
+    "sinking": {
+      "fps": 2.0,
+      "frames": 6
+    },
+    "w": 52
+  },
+  "cannonball": {
+    "fps": 1.0,
+    "frames": 1,
+    "h": 6,
+    "loop": false,
+    "w": 6
+  },
+  "chain_shot": {
+    "fps": 16.0,
+    "frames": 4,
+    "h": 10,
+    "loop": true,
+    "w": 10
+  },
+  "coin": {
+    "fps": 12.0,
+    "frames": 6,
+    "h": 8,
+    "loop": true,
+    "w": 8
+  },
+  "dolphin_jump": {
+    "fps": 12.0,
+    "frames": 8,
+    "h": 16,
+    "loop": false,
+    "w": 24
+  },
+  "explosion_big": {
+    "fps": 16.0,
+    "frames": 8,
+    "h": 48,
+    "loop": false,
+    "w": 48
+  },
+  "explosion_hit": {
+    "fps": 18.0,
+    "frames": 5,
+    "h": 24,
+    "loop": false,
+    "w": 24
+  },
+  "fire_ball": {
+    "fps": 1.0,
+    "frames": 1,
+    "h": 6,
+    "loop": false,
+    "w": 6
+  },
+  "fire_large": {
+    "fps": 10.0,
+    "frames": 4,
+    "h": 24,
+    "loop": true,
+    "w": 16
+  },
+  "frigate": {
+    "h": 66,
+    "headings": 32,
+    "sinking": {
+      "fps": 2.0,
+      "frames": 6
+    },
+    "w": 68
+  },
+  "galleon": {
+    "h": 78,
+    "headings": 32,
+    "sinking": {
+      "fps": 2.0,
+      "frames": 6
+    },
+    "w": 80
+  },
+  "geyser": {
+    "fps": 14.0,
+    "frames": 6,
+    "h": 32,
+    "loop": false,
+    "w": 16
+  },
+  "grape_shot": {
+    "fps": 1.0,
+    "frames": 1,
+    "h": 4,
+    "loop": false,
+    "w": 4
+  },
+  "gull": {
+    "fps": 8.0,
+    "frames": 4,
+    "h": 12,
+    "loop": true,
+    "w": 12
+  },
+  "muzzle_flash": {
+    "fps": 20.0,
+    "frames": 4,
+    "h": 16,
+    "loop": false,
+    "w": 16
+  },
+  "pickups": {
+    "fps": 4.0,
+    "frames": 4,
+    "h": 16,
+    "loop": true,
+    "w": 16
+  },
+  "shockwave": {
+    "fps": 14.0,
+    "frames": 6,
+    "h": 40,
+    "loop": false,
+    "w": 64
+  },
+  "sloop": {
+    "h": 40,
+    "headings": 32,
+    "sinking": {
+      "fps": 2.0,
+      "frames": 6
+    },
+    "w": 42
+  },
+  "smoke_column": {
+    "fps": 8.0,
+    "frames": 6,
+    "h": 32,
+    "loop": true,
+    "w": 16
+  },
+  "smoke_puff": {
+    "fps": 10.0,
+    "frames": 6,
+    "h": 16,
+    "loop": false,
+    "w": 16
+  },
+  "splash": {
+    "fps": 14.0,
+    "frames": 6,
+    "h": 24,
+    "loop": false,
+    "w": 16
+  },
+  "whale_breach": {
+    "fps": 10.0,
+    "frames": 12,
+    "h": 48,
+    "loop": false,
+    "w": 64
+  }
+}

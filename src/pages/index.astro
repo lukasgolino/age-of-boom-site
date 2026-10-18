@@ -1,0 +1,520 @@
+---
+import fs from "node:fs";
+import Base from "../layouts/Base.astro";
+import Sprite from "../components/Sprite.astro";
+import Shipyard from "../components/Shipyard.astro";
+import { AMMO, CLIPS, LINKS, MODES, PAGAN_URL, SEA, STEAM_URL } from "../lib/data";
+
+const base = import.meta.env.BASE_URL;
+// Only clips whose loop has been recorded (public/video/<loop>.mp4) are shown.
+const clips = CLIPS.filter((c) => fs.existsSync(`public/video/${c.loop}.mp4`));
+const shots = fs.existsSync("public/img/shots")
+  ? fs.readdirSync("public/img/shots").filter((f) => /\.(png|jpe?g|webp)$/.test(f)).sort()
+  : [];
+---
+
+<Base
+  title="Age of Boom: loud arcade naval combat"
+  description="Top-down pixel-art naval combat. Out-sail other captains, get your broadside on them first, and sink them in a shower of splinters. Online deathmatch, co-op Last Stand and solo modes."
+>
+  <header class="hero water">
+    <div class="hero-shade"></div>
+    <div class="fleet" aria-hidden="true">
+      <span class="sail s1"><Sprite name="galleon" file="galleon_red" heading={18} scale={3} /></span>
+      <span class="sail s2"><Sprite name="frigate" file="frigate_blue" heading={1} scale={3} /></span>
+      <span class="sail s3"><Sprite name="sloop" file="sloop_gold" heading={12} scale={3} /></span>
+      <span class="boom b1"><Sprite name="explosion_big" scale={3} /></span>
+      <span class="boom b2"><Sprite name="explosion_big" scale={2} delay={0.9} /></span>
+      <span class="gull g1"><Sprite name="gull" scale={3} /></span>
+      <span class="gull g2"><Sprite name="gull" scale={2} delay={0.2} /></span>
+    </div>
+    <div class="wrap hero-inner">
+      <p class="kicker">Pixel-art naval combat</p>
+      <h1 class="title">Age of <span class="boom-word">Boom</span></h1>
+      <p class="tagline">Out-sail. Out-gun. <strong>Sink them.</strong></p>
+      <p class="lede">
+        Captain a ship in loud, loosely historical sea battles. Your cannons fire from the side, so positioning is aiming:
+        get your broadside on the enemy before theirs is on you.
+      </p>
+      <div class="ctas">
+        {
+          STEAM_URL ? (
+            <a class="btn" href={STEAM_URL}>Wishlist on Steam</a>
+          ) : (
+            <span class="btn" aria-disabled="true">Coming to Steam</span>
+          )
+        }
+        <a class="btn ghost" href={clips.length ? "#footage" : "#ships"}>{clips.length ? "Watch gameplay" : "Meet the fleet"}</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="pillars">
+      <div class="wrap grid3">
+        <article class="reveal">
+          <Sprite name="galleon" file="galleon_base" heading={2} scale={2} />
+          <h3>Positioning is aiming</h3>
+          <p>No crosshair. Skill lives in the helm: wind, momentum and turn rate decide who fires first.</p>
+        </article>
+        <article class="reveal">
+          <Sprite name="explosion_big" scale={2} />
+          <h3>Every hit is a show</h3>
+          <p>Balls arc through the air, hulls splinter, sails tear, magazines go up and ships capsize.</p>
+        </article>
+        <article class="reveal">
+          <Sprite name="fire_large" scale={3} />
+          <h3>Readable at a glance</h3>
+          <p>Class, damage, fire, torn sails and loaded side are all visible on the sprites themselves.</p>
+        </article>
+      </div>
+    </section>
+
+    {
+      clips.length > 0 && (
+        <section id="footage" class="footage">
+          <div class="wrap">
+            <p class="kicker">Gameplay</p>
+            <h2>Broadsides, live</h2>
+            <div class="clips">
+              {clips.map((c) => (
+                <figure class="clip frame reveal">
+                  <video autoplay muted loop playsinline preload="metadata" poster={`${base}video/${c.loop}.jpg`}>
+                    <source src={`${base}video/${c.loop}.webm`} type="video/webm" />
+                    <source src={`${base}video/${c.loop}.mp4`} type="video/mp4" />
+                  </video>
+                  <figcaption>
+                    <h3>{c.title}</h3>
+                    <p>{c.blurb}</p>
+                    {c.youtube && (
+                      <a href={`https://www.youtube.com/watch?v=${c.youtube}`} target="_blank" rel="noopener">
+                        Watch the full battle
+                      </a>
+                    )}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <section id="ships" class="ships">
+      <div class="wrap">
+        <p class="kicker">The fleet</p>
+        <h2>From sloop to galleon</h2>
+        <p class="lede">
+          Sink and plunder for gold, then buy bigger hulls, more cannons and better ammo. Move the pointer over a ship and it
+          turns to face it. Every class beats a fully upgraded ship of the class below, and a sloop still out-runs them all.
+        </p>
+        <Shipyard />
+      </div>
+    </section>
+
+    <section class="arsenal">
+      <div class="wrap">
+        <p class="kicker">The arsenal</p>
+        <h2>Pick your poison</h2>
+        <div class="ammo">
+          {
+            AMMO.map((a) => (
+              <article class="frame reveal">
+                <div class="ammo-icon">
+                  <Sprite name={a.sprite} scale={6} />
+                </div>
+                <h3>{a.name}</h3>
+                <p>{a.text}</p>
+              </article>
+            ))
+          }
+        </div>
+        <p class="lede">
+          Plus bow chasers, swivel guns, smoke screens and floating barrels: powder kegs, repair kits, fair winds.
+          <Sprite name="pickups" scale={2} />
+        </p>
+      </div>
+    </section>
+
+    <section class="modes water">
+      <div class="hero-shade"></div>
+      <div class="wrap">
+        <p class="kicker">Modes</p>
+        <h2>Online or alone</h2>
+        <div class="mode-grid">
+          {
+            MODES.map((m) => (
+              <article class="frame reveal">
+                <p class="tag">{m.tag}</p>
+                <h3>{m.name}</h3>
+                <p>{m.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="sea">
+      <div class="wrap">
+        <p class="kicker">The sea fights back</p>
+        <h2>Wind, fog, night and ice</h2>
+        <ul class="sea-list">
+          {
+            SEA.map((s) => (
+              <li class="reveal">
+                <h3>{s.name}</h3>
+                <p>{s.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="life" aria-hidden="true">
+          <Sprite name="whale_breach" scale={3} />
+          <Sprite name="dolphin_jump" scale={3} delay={0.3} />
+          <Sprite name="gull" scale={3} />
+        </div>
+      </div>
+    </section>
+
+    {
+      shots.length > 0 && (
+        <section class="gallery">
+          <div class="wrap">
+            <p class="kicker">Screenshots</p>
+            <div class="shots">
+              {shots.map((f) => (
+                <a class="frame" href={`${base}img/shots/${f}`} target="_blank" rel="noopener">
+                  <img class="px" src={`${base}img/shots/${f}`} alt="" loading="lazy" width="1920" height="1080" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <section class="pagan">
+      <div class="wrap pagan-inner reveal">
+        <div class="pagan-ships" aria-hidden="true">
+          <Sprite name="sloop" file="sloop_base" heading={4} scale={3} />
+          <Sprite name="brig" file="brig_red" heading={4} scale={3} />
+          <Sprite name="frigate" file="frigate_blue" heading={4} scale={3} />
+          <Sprite name="galleon" file="galleon_gold" heading={4} scale={3} />
+        </div>
+        <div>
+          <p class="kicker">Built with PAGAN</p>
+          <h2>Every pixel is written as text</h2>
+          <p class="lede">
+            Every ship, explosion and wave in Age of Boom is drawn with <a href={PAGAN_URL}>PAGAN</a> (Pixel Art Grammar And
+            Notation): voxel hulls rendered in 32 headings, sails that furl and tear, team colours by palette swap, all built
+            from text source files.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="final water">
+      <div class="hero-shade"></div>
+      <div class="wrap final-inner">
+        <Sprite name="galleon" file="galleon_base_sinking" scale={3} />
+        <h2>Feed the fishes.</h2>
+        <p class="lede">Age of Boom is in development for PC.</p>
+        <div class="ctas">
+          {
+            STEAM_URL ? (
+              <a class="btn" href={STEAM_URL}>Wishlist on Steam</a>
+            ) : (
+              <span class="btn" aria-disabled="true">Coming to Steam</span>
+            )
+          }
+          {LINKS.map((l) => <a class="btn ghost" href={l.href}>{l.label}</a>)}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>© {new Date().getFullYear()} Age of Boom. All rights reserved.</p>
+  </footer>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: min(100svh, 900px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 50%, rgb(6 15 26 / 0.35), rgb(6 15 26 / 0.85) 75%),
+      linear-gradient(to bottom, transparent 70%, var(--abyss));
+    pointer-events: none;
+  }
+
+  .hero-inner,
+  .modes .wrap,
+  .pagan-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 48px;
+    align-items: center;
+  }
+
+  .pagan-ships {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+  }
+
+  @media (max-width: 860px) {
+    .pagan-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .final-inner {
+    position: relative;
+  }
+
+  .hero-inner {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .title {
+    font-size: clamp(3.6rem, 13vw, 9.5rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    text-shadow:
+      4px 4px 0 var(--abyss),
+      8px 8px 0 rgb(0 0 0 / 0.35);
+  }
+
+  .boom-word {
+    display: inline-block;
+    color: var(--gold);
+    text-shadow:
+      0 4px 0 var(--fire),
+      0 8px 0 var(--red),
+      4px 12px 0 var(--abyss);
+    animation: shake 2.6s infinite;
+  }
+
+  @keyframes shake {
+    0%, 86%, 100% { transform: none; }
+    88% { transform: translate(-4px, 2px) rotate(-1.5deg); }
+    90% { transform: translate(4px, -3px) rotate(1deg); }
+    92% { transform: translate(-3px, 1px); }
+    94% { transform: translate(2px, 0); }
+  }
+
+  .tagline {
+    font-family: var(--pixel);
+    font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    margin-top: 28px;
+  }
+
+  .tagline strong {
+    color: var(--fire);
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 36px;
+  }
+
+  .fleet span {
+    position: absolute;
+  }
+
+  .sail {
+    animation: bob 4s ease-in-out infinite;
+  }
+
+  .s1 { right: 8%; top: 22%; }
+  .s2 { right: 30%; top: 62%; animation-delay: -1.3s; }
+  .s3 { right: 4%; top: 70%; animation-delay: -2.1s; }
+  .b1 { right: 12%; top: 46%; }
+  .b2 { right: 26%; top: 30%; }
+  .g1 { right: 40%; top: 14%; animation: fly 26s linear infinite; }
+  .g2 { right: 18%; top: 10%; animation: fly 34s linear infinite -10s; }
+
+  @keyframes bob {
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes fly {
+    from { transform: translateX(30vw); }
+    to { transform: translateX(-80vw); }
+  }
+
+  @media (max-width: 760px) {
+    .fleet { display: none; }
+  }
+
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 48px;
+  }
+
+  .pillars article {
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+  }
+
+  .pillars .sprite {
+    height: 96px;
+  }
+
+  .pillars p,
+  .clip p,
+  .ammo p,
+  .mode-grid p,
+  .sea-list p {
+    color: var(--ink-dim);
+  }
+
+  .clips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 48px;
+  }
+
+  .clip {
+    margin: 0;
+  }
+
+  .clip video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--abyss);
+  }
+
+  .clip figcaption {
+    padding: 20px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .ammo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 36px;
+    margin: 48px 0;
+  }
+
+  .ammo article,
+  .mode-grid article {
+    padding: 24px;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .ammo-icon {
+    height: 64px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 36px;
+    margin-top: 48px;
+  }
+
+  .tag {
+    font-family: var(--pixel);
+    font-size: 0.75rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .sea-list {
+    list-style: none;
+    padding: 0;
+    margin: 48px 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px 48px;
+  }
+
+  .sea-list li {
+    border-left: 4px solid var(--sea-2);
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .life {
+    display: flex;
+    gap: 40px;
+    align-items: end;
+    margin-top: 56px;
+    flex-wrap: wrap;
+  }
+
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+  }
+
+  .shots img {
+    width: 100%;
+    height: auto;
+  }
+
+  .pagan-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 48px;
+    align-items: center;
+  }
+
+  .pagan-ships {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+  }
+
+  @media (max-width: 860px) {
+    .pagan-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .final-inner {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .final .ctas {
+    justify-content: center;
+  }
+
+  .foot {
+    padding-top: 32px;
+    padding-bottom: 40px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
