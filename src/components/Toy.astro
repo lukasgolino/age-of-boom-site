@@ -1,0 +1,163 @@
+---
+// Broadside toy: a playable canvas teaser (src/scripts/toy.ts). Cannons fire from the sides only.
+---
+
+<div class="toy">
+  <div class="toy-box">
+    <canvas width="480" height="270" tabindex="0" aria-label="Broadside: a small playable sea battle. Click to play."></canvas>
+    <button type="button" class="toy-start" hidden>Click to set sail</button>
+    <div class="toy-touch" aria-hidden="true">
+      <div class="pad">
+        <button type="button" tabindex="-1" data-touch="left">&#9664;</button>
+        <div class="col">
+          <button type="button" tabindex="-1" data-touch="up">&#9650;</button>
+          <button type="button" tabindex="-1" data-touch="down">&#9660;</button>
+        </div>
+        <button type="button" tabindex="-1" data-touch="right">&#9654;</button>
+      </div>
+      <div class="pad">
+        <button type="button" tabindex="-1" data-touch="port" class="fire">Port</button>
+        <button type="button" tabindex="-1" data-touch="stbd" class="fire">Stbd</button>
+      </div>
+    </div>
+  </div>
+  <p class="toy-legend keys">
+    <span><kbd>W</kbd><kbd>S</kbd> sail</span>
+    <span><kbd>A</kbd><kbd>D</kbd> turn</span>
+    <span><kbd>Q</kbd> port</span>
+    <span><kbd>E</kbd> starboard</span>
+    <span><kbd>Space</kbd> nearest side</span>
+  </p>
+  <p class="toy-legend touch">
+    <span><kbd>&#9664; &#9654;</kbd> turn</span>
+    <span><kbd>&#9650; &#9660;</kbd> sail</span>
+    <span><kbd>Port</kbd><kbd>Stbd</kbd> fire a broadside</span>
+  </p>
+</div>
+
+<script>
+  import { mountToy } from "../scripts/toy.ts";
+  for (const el of document.querySelectorAll<HTMLElement>(".toy")) mountToy(el);
+</script>
+
+<style>
+  .toy {
+    width: 100%;
+  }
+  .toy-box {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--sea);
+    box-shadow: 0 0 0 3px var(--abyss);
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    image-rendering: pixelated;
+    outline: none;
+  }
+  .toy-box:has(canvas:focus-visible) {
+    box-shadow:
+      0 0 0 3px var(--abyss),
+      0 0 0 6px var(--gold-hi);
+  }
+  .toy-start {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: max-content;
+    height: max-content;
+    font: 700 clamp(0.8rem, 2.4vw, 1.1rem) / 1 var(--pixel);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #2a1606;
+    background: var(--gold);
+    border: 0;
+    padding: clamp(8px, 2vw, 14px) clamp(12px, 3vw, 20px) clamp(6px, 1.7vw, 12px);
+    cursor: pointer;
+    box-shadow:
+      0 4px 0 var(--gold-lo),
+      0 4px 0 3px var(--abyss),
+      0 0 0 3px var(--abyss);
+  }
+  .toy-start[hidden] {
+    display: none;
+  }
+  .toy-start:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 3px var(--abyss);
+  }
+  .toy-touch,
+  .toy-legend.touch {
+    display: none;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .toy-legend.keys {
+      display: none;
+    }
+    .toy-legend.touch {
+      display: flex;
+    }
+    .toy.playing .toy-touch {
+      position: absolute;
+      inset: auto 0 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 8px 22px;
+      pointer-events: none;
+    }
+  }
+  .pad {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    pointer-events: auto;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pad button {
+    min-width: 40px;
+    min-height: 36px;
+    padding: 4px 8px;
+    font: 700 0.75rem/1 var(--pixel);
+    text-transform: uppercase;
+    color: var(--ink);
+    background: rgb(6 15 26 / 0.55);
+    border: 2px solid rgb(243 234 216 / 0.35);
+    touch-action: none;
+  }
+  .pad .col button {
+    min-height: 28px;
+  }
+  .pad button.fire {
+    min-width: 56px;
+    min-height: 48px;
+    color: var(--gold);
+    border-color: rgb(232 180 44 / 0.6);
+  }
+  .toy-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 12px;
+    font: 400 0.72rem/1.4 var(--pixel);
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+  }
+  kbd {
+    font: inherit;
+    color: var(--gold);
+    margin-right: 3px;
+  }
+</style>

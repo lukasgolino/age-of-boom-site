@@ -1,0 +1,326 @@
+---
+import fs from "node:fs";
+import Sprite from "./Sprite.astro";
+import { BANNERS, KILL_FEED, STEAM_URL } from "../lib/data";
+
+const base = import.meta.env.BASE_URL;
+const hasVideo = fs.existsSync("public/video/loop_galleons.mp4");
+---
+
+<header id="top" class="hero water">
+  {
+    hasVideo && (
+      <video class="bg" autoplay muted loop playsinline preload="auto" poster={`${base}video/loop_galleons.jpg`} aria-hidden="true">
+        <source src={`${base}video/loop_galleons.webm`} type="video/webm" />
+        <source src={`${base}video/loop_galleons.mp4`} type="video/mp4" />
+      </video>
+    )
+  }
+  <div class="shade"></div>
+
+  <ol class="feed hud" aria-hidden="true" data-feed={JSON.stringify(KILL_FEED)}></ol>
+  <div class="announce" aria-hidden="true" data-banners={JSON.stringify(BANNERS)}><span class="ribbon"></span></div>
+
+  <div class="wrap inner">
+    <h1 class="title">
+      <span class="age">Age of</span>
+      <span class="boom">Boom<Sprite name="explosion_big" scale={3} class="blast" /></span>
+    </h1>
+    <p class="tagline hud">Out-sail. Out-gun. <span>Sink them.</span></p>
+    <p class="lede">
+      Loud, pixel-art naval combat in the age of sail. Your cannons fire from the side, so <strong>positioning is aiming</strong>:
+      get your broadside on them before theirs is on you.
+    </p>
+    <div class="ctas">
+      {
+        STEAM_URL ? (
+          <a class="btn primary" href={STEAM_URL}>Wishlist on Steam</a>
+        ) : (
+          <span class="btn primary" aria-disabled="true">Coming to Steam</span>
+        )
+      }
+      <a class="btn" href="#play">Fire a broadside</a>
+    </div>
+  </div>
+
+  <a class="scroll hud" href="#gameplay" aria-label="Scroll to gameplay">
+    <Sprite name="gull" scale={3} />
+  </a>
+</header>
+
+<script>
+  const hero = document.querySelector<HTMLElement>(".hero")!;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Kill feed: one line every ~2.4 s, the newest on top, at most 4.
+  const feed = hero.querySelector<HTMLOListElement>(".feed")!;
+  const lines = JSON.parse(feed.dataset.feed!) as [string, string, string, string, string][];
+  let i = 0;
+  function push() {
+    const [k, kt, v, vt, how] = lines[i++ % lines.length];
+    const li = document.createElement("li");
+    li.innerHTML = `<b class="t-${kt}"></b> <span class="how"></span> <b class="t-${vt}"></b>`;
+    const [kb, hs, vb] = li.children as unknown as HTMLElement[];
+    kb.textContent = k;
+    hs.textContent = how === "MAGAZINE!" ? "blew up" : how === "rammed" ? "rammed" : "sank";
+    vb.textContent = v;
+    if (how === "MAGAZINE!") li.classList.add("hot");
+    feed.prepend(li);
+    while (feed.children.length > 4) feed.lastElementChild!.remove();
+  }
+  push();
+  setInterval(push, 2400);
+
+  // Announcer banners.
+  const ann = hero.querySelector<HTMLElement>(".announce")!;
+  const ribbon = ann.querySelector<HTMLElement>(".ribbon")!;
+  const banners = JSON.parse(ann.dataset.banners!) as string[];
+  let b = 0;
+  function announce() {
+    ribbon.textContent = banners[b++ % banners.length];
+    ann.classList.remove("show");
+    void ann.offsetWidth;
+    ann.classList.add("show");
+    if (!reduce) {
+      hero.classList.remove("shake");
+      void hero.offsetWidth;
+      hero.classList.add("shake");
+    }
+  }
+  setTimeout(() => {
+    announce();
+    setInterval(announce, 5200);
+  }, 1600);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+    z-index: -2;
+  }
+
+  .shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(6 15 26 / 0.92) 0%, rgb(6 15 26 / 0.6) 45%, rgb(6 15 26 / 0.05) 80%),
+      linear-gradient(to bottom, rgb(6 15 26 / 0.5), transparent 25%, transparent 70%, var(--abyss));
+  }
+
+  .inner {
+    padding-top: 120px;
+    padding-bottom: 120px;
+  }
+
+  .title {
+    text-transform: uppercase;
+    line-height: 0.85;
+    display: grid;
+  }
+
+  .age {
+    font-size: clamp(2.6rem, 7vw, 5.2rem);
+    color: var(--ink);
+    text-shadow: 4px 4px 0 var(--abyss);
+  }
+
+  .boom {
+    position: relative;
+    font-size: clamp(5.5rem, 19vw, 14rem);
+    color: var(--gold);
+    text-shadow:
+      0 5px 0 var(--fire),
+      0 10px 0 var(--red),
+      0 15px 0 var(--red-lo),
+      6px 21px 0 var(--abyss);
+    width: max-content;
+  }
+
+  .boom :global(.blast) {
+    position: absolute;
+    right: -0.25em;
+    top: -0.15em;
+    animation-duration: 2.6s;
+    animation-timing-function: steps(8, jump-none);
+  }
+
+  .tagline {
+    font-size: clamp(16px, 2.2vw, 24px);
+    margin-top: 40px;
+    text-transform: uppercase;
+  }
+
+  .tagline span {
+    color: var(--fire);
+  }
+
+  .lede strong {
+    color: var(--ink);
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .feed {
+    position: absolute;
+    top: 96px;
+    right: var(--gutter);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    justify-items: end;
+    font-size: 16px;
+    z-index: 1;
+  }
+
+  .feed :global(li) {
+    background: rgb(6 15 26 / 0.7);
+    padding: 4px 10px;
+    animation: feed-in 300ms steps(4);
+    white-space: nowrap;
+  }
+
+  .feed :global(li:nth-child(3)) {
+    opacity: 0.6;
+  }
+
+  .feed :global(li:nth-child(4)) {
+    opacity: 0.3;
+  }
+
+  .feed :global(.how) {
+    color: var(--muted);
+  }
+
+  .feed :global(.hot .how) {
+    color: var(--fire);
+  }
+
+  .feed :global(.t-red) {
+    color: #e8644f;
+  }
+
+  .feed :global(.t-blue) {
+    color: #8fbcff;
+  }
+
+  .feed :global(.t-gold) {
+    color: var(--gold-hi);
+  }
+
+  @keyframes feed-in {
+    from {
+      transform: translateX(40px);
+      opacity: 0;
+    }
+  }
+
+  .announce {
+    position: absolute;
+    left: 50%;
+    top: 104px;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .announce .ribbon {
+    font-size: 32px;
+    border-width: 20px 24px;
+    border-image-width: 20px 24px;
+    white-space: nowrap;
+  }
+
+  .announce.show {
+    animation: announce 1.9s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  }
+
+  @keyframes announce {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) scale(2.2);
+    }
+    12% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+    80% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px) scale(1);
+    }
+  }
+
+  .hero.shake .inner {
+    animation: shake 260ms steps(5);
+  }
+
+  @keyframes shake {
+    20% { transform: translate(-5px, 3px); }
+    40% { transform: translate(5px, -4px); }
+    60% { transform: translate(-3px, 2px); }
+    80% { transform: translate(2px, -1px); }
+  }
+
+  .scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    animation: bob 2.4s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    50% {
+      transform: translate(-50%, -8px);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .announce {
+      left: 77%;
+      top: 64%;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .feed {
+      display: none;
+    }
+
+    .shade {
+      background: linear-gradient(to bottom, rgb(6 15 26 / 0.55), rgb(6 15 26 / 0.85) 50%, var(--abyss));
+    }
+
+
+    .announce .ribbon {
+      font-size: 16px;
+      border-width: 15px 18px;
+      border-image-width: 15px 18px;
+    }
+  }
+</style>

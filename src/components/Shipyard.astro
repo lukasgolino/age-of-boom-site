@@ -17,20 +17,20 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
 <div class="yard">
   {
     SHIPS.map((s) => (
-      <article class="ship frame reveal" data-ship={s.id} data-w={S[s.id].w} data-h={S[s.id].h} data-sink={S[s.id].sinking?.frames} data-sink-fps={S[s.id].sinking?.fps} data-base={base}>
+      <article class="ship panel reveal" data-ship={s.id} data-w={S[s.id].w} data-h={S[s.id].h} data-sink={S[s.id].sinking?.frames} data-sink-fps={S[s.id].sinking?.fps} data-base={base}>
         <div class="stage water">
           <canvas width="240" height="240" aria-label={`${s.name} sprite`} role="img" />
         </div>
         <div class="info">
           <h3>{s.name}</h3>
           <p class="role">{s.role}</p>
-          <dl>
+          <dl class="hud">
             <dt>Hull</dt>
             <dd><span style={`--v:${stat(s.hp, SHIP_MAX.hp)}`} /><b>{s.hp}</b></dd>
             <dt>Speed</dt>
             <dd><span style={`--v:${stat(s.speed, SHIP_MAX.speed)}`} /><b>{s.speed}</b></dd>
             <dt>Turn</dt>
-            <dd><span style={`--v:${stat(s.turn, SHIP_MAX.turn)}`} /><b>{s.turn}°/s</b></dd>
+            <dd><span style={`--v:${stat(s.turn, SHIP_MAX.turn)}`} /><b>{s.turn}/s</b></dd>
             <dt>Guns</dt>
             <dd><span style={`--v:${stat(s.guns, SHIP_MAX.guns)}`} /><b>{s.guns} a side</b></dd>
           </dl>
@@ -41,7 +41,7 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
                 <button type="button" data-team={t.id} aria-label={t.label} aria-pressed={i === 0 ? "true" : "false"} style={`--c:${t.color}`} />
               ))}
             </div>
-            <button type="button" class="sink">Sink her</button>
+            <button type="button" class="sink hud">Sink her</button>
           </div>
         </div>
       </article>
@@ -159,11 +159,20 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
   .ship {
     display: grid;
     grid-template-columns: 200px 1fr;
+    color: var(--ink);
+  }
+
+  .stage {
+    box-shadow: inset 0 0 0 3px rgb(0 0 0 / 0.4);
   }
 
   @media (max-width: 520px) {
     .ship {
       grid-template-columns: 1fr;
+    }
+
+    .info {
+      padding: 18px 0 0;
     }
   }
 
@@ -179,7 +188,7 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
   }
 
   .info {
-    padding: 20px 22px;
+    padding: 4px 4px 4px 22px;
     display: grid;
     gap: 10px;
     align-content: start;
@@ -201,8 +210,8 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
     grid-template-columns: auto 1fr;
     gap: 6px 12px;
     margin: 4px 0;
-    font-family: var(--pixel);
-    font-size: 0.72rem;
+    font-size: 16px;
+    line-height: 1;
     text-transform: uppercase;
     align-items: center;
   }
@@ -260,7 +269,8 @@ const stat = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
   }
 
   .sink {
-    font: 700 0.75rem/1 var(--pixel);
+    font-size: 16px;
+    line-height: 1;
     text-transform: uppercase;
     background: var(--red);
     color: var(--ink);

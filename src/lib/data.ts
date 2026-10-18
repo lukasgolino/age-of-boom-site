@@ -19,27 +19,43 @@ export interface Clip {
 
 export const CLIPS: Clip[] = [
   {
+    id: "galleons",
+    title: "Galleon battle",
+    blurb: "Two gun decks a side. Fires, splintered hulls and powder magazines going up.",
+    loop: "loop_galleons",
+    youtube: "",
+  },
+  {
     id: "ffa",
     title: "Free-for-all",
-    blurb: "Four captains, one sea, nobody's friend. Online deathmatch with friends or bots.",
+    blurb: "Four captains, one sea, no friends. Online deathmatch with mates or bots.",
     loop: "loop_ffa",
     youtube: "",
   },
   {
     id: "sloop",
     title: "Sloop duel",
-    blurb: "Two sloops, one gun a side. It all comes down to who gets the broadside first.",
+    blurb: "One gun a side. Whoever gets the broadside on first wins.",
     loop: "loop_sloop",
     youtube: "",
   },
-  {
-    id: "galleons",
-    title: "Galleon battle",
-    blurb: "Ten guns a side, two decks of them. Fires, falling masts and powder magazines going up.",
-    loop: "loop_galleons",
-    youtube: "",
-  },
+  { id: "night", title: "Night action", blurb: "Lanterns, fires and muzzle flashes are all that give you away.", loop: "loop_night", youtube: "" },
+  { id: "arctic", title: "Arctic waters", blurb: "Ice floes for cover. Crack them with round shot, or ram.", loop: "loop_arctic", youtube: "" },
+  { id: "sinking", title: "Feed the fishes", blurb: "Capsize, bubbles, debris and gold. Every sinking is a show.", loop: "loop_sinking", youtube: "" },
 ];
+
+/** Hero kill feed: [killer, team, victim, team, how]. */
+export const KILL_FEED: [string, string, string, string, string][] = [
+  ["Mad Morgan", "red", "Cpt Barnacle", "blue", "broadside"],
+  ["Anne Bonny", "gold", "One-Eyed Sal", "red", "fire shot"],
+  ["Cpt Barnacle", "blue", "Mad Morgan", "red", "MAGAZINE!"],
+  ["One-Eyed Sal", "red", "Anne Bonny", "gold", "chain shot"],
+  ["Anne Bonny", "gold", "Cpt Barnacle", "blue", "grape shot"],
+  ["Mad Morgan", "red", "Anne Bonny", "gold", "rammed"],
+];
+
+/** Announcer banners that flash over the hero (the game's own streak calls). */
+export const BANNERS = ["FIRST BLOOD!", "BROADSIDE!", "DOUBLE SINK!", "MAGAZINE!", "FEED THE FISHES!"];
 
 export interface Ship {
   id: "sloop" | "brig" | "frigate" | "galleon";
@@ -64,15 +80,18 @@ export const SHIP_MAX = { hp: 1300, speed: 90, turn: 90, guns: 12 };
 export interface Ammo {
   id: string;
   name: string;
+  /** public/sprites/ui/icon_<sprite>.png */
   sprite: string;
   text: string;
+  dmg: string;
+  range: string;
 }
 
 export const AMMO: Ammo[] = [
-  { id: "round", name: "Round shot", sprite: "cannonball", text: "Long range, honest damage. The default for a reason." },
-  { id: "chain", name: "Chain shot", sprite: "chain_shot", text: "Shreds sails. A ship with torn canvas turns and runs at half speed." },
-  { id: "grape", name: "Grape shot", sprite: "grape_shot", text: "A shotgun blast at close range. Every pellet slows the enemy's reload." },
-  { id: "fire", name: "Fire shot", sprite: "fire_ball", text: "Sets the target alight. Burning ships blow their magazines more often." },
+  { id: "round", name: "Round shot", sprite: "round_shot", text: "Long range, honest damage. The default for a reason.", dmg: "12", range: "220" },
+  { id: "chain", name: "Chain shot", sprite: "chain_shot", text: "Shreds sails. A ship with torn canvas limps along at half speed.", dmg: "6", range: "176" },
+  { id: "grape", name: "Grape shot", sprite: "grape_shot", text: "A shotgun blast at close range. Every pellet kills crew and slows their reload.", dmg: "6 x3", range: "121" },
+  { id: "fire", name: "Fire shot", sprite: "fire_shot", text: "Sets the target alight. Burning ships blow their magazines far more often.", dmg: "8 + burn", range: "220" },
 ];
 
 export interface Mode {

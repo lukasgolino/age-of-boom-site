@@ -13,6 +13,8 @@ import argparse
 import json
 from pathlib import Path
 
+from fontTools.fontBuilder import FontBuilder
+from fontTools.pens.ttGlyphPen import TTGlyphPen
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -77,6 +79,57 @@ def save(img: Image.Image, name: str) -> None:
     img.save(OUT / f"{name}.png", optimize=True)
 
 
+def build_font(sheet_path: Path, out: Path) -> None:
+    """The game's 5x7 HUD font (font_small: ASCII 32..126 + ellipsis, 16 per row, 6x8 cells) as a pixel-square TTF."""
+    sheet = Image.open(sheet_path).convert("RGBA")
+    px, cell_w, cell_h, per_row = 100, 6, 8, 16
+    codes = list(range(32, 127)) + [0x2026]
+    names = [".notdef"] + [f"g{c:04x}" for c in codes]
+    glyphs, metrics, cmap = {}, {}, {}
+    pen = TTGlyphPen(None)
+    glyphs[".notdef"] = pen.glyph()
+    metrics[".notdef"] = (cell_w * px, 0)
+    for i, code in enumerate(codes):
+        cx, cy = (i % per_row) * cell_w, (i // per_row) * cell_h
+        on = {(x, y) for y in range(cell_h) for x in range(cell_w) if sheet.getpixel((cx + x, cy + y))[3] >= 128}
+        # Proportional: trim the glyph to its ink, 1px gap after it; space is 3px.
+        x0 = min((x for x, _ in on), default=0)
+        width = (max(x for x, _ in on) - x0 + 1) if on else 2
+        pen = TTGlyphPen(None)
+        for y in range(cell_h):
+            x = x0
+            while x < cell_w:
+                if (x, y) not in on:
+                    x += 1
+                    continue
+                start = x
+                while (x, y) in on:
+                    x += 1
+                top, bottom = (7 - y) * px, (6 - y) * px
+                # Clockwise outer contour (TrueType).
+                pen.moveTo(((start - x0) * px, bottom))
+                pen.lineTo(((start - x0) * px, top))
+                pen.lineTo(((x - x0) * px, top))
+                pen.lineTo(((x - x0) * px, bottom))
+                pen.closePath()
+        name = f"g{code:04x}"
+        glyphs[name] = pen.glyph()
+        metrics[name] = ((width + 1) * px, 0)
+        cmap[code] = name
+    fb = FontBuilder(cell_h * px, isTTF=True)
+    fb.setupGlyphOrder(names)
+    fb.setupCharacterMap(cmap)
+    fb.setupGlyf(glyphs)
+    fb.setupHorizontalMetrics(metrics)
+    fb.setupHorizontalHeader(ascent=7 * px, descent=-1 * px)
+    fb.setupNameTable({"familyName": "Boom Pixel", "styleName": "Regular"})
+    fb.setupOS2(sTypoAscender=7 * px, sTypoDescender=-1 * px, usWinAscent=7 * px, usWinDescent=1 * px)
+    fb.setupPost()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fb.font.flavor = "woff2"
+    fb.save(out)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--game", type=Path, default=ROOT.parent / "age-of-boom")
@@ -115,6 +168,20 @@ def main() -> None:
     for biome, v in water.get("variants", {}).items():
         if v.get("swap"):
             save(swap(tile, v["swap"]), f"water_{biome}")
+
+    # UI: 9-slice panel/banner/button frames and named icons, one PNG each.
+    ui = OUT / "ui"
+    ui.mkdir(exist_ok=True)
+    for name in ("ui_panel", "ui_banner", "ui_button", "ui_bubble", "icons", "signal_flags"):
+        a = manifest[name]
+        sheet = Image.open(res(args.game, a["sheet"])).convert("RGBA")
+        for anim, an in a["animations"].items():
+            x, y, w, h = a["frames"][an["frames"][0]]
+            frame = sheet.crop((x, y, x + w, y + h))
+            frame = frame.crop(frame.getbbox()) if name == "signal_flags" else frame
+            frame.save(ui / f"{name.removeprefix('ui_')}_{anim}.png" if name != "icons" else ui / f"icon_{anim}.png", optimize=True)
+
+    build_font(res(args.game, manifest["font_small"]["sheet"]), ROOT / "public" / "fonts" / "boom-pixel.woff2")
 
     INDEX.parent.mkdir(parents=True, exist_ok=True)
     INDEX.write_text(json.dumps(index, indent=2, sort_keys=True) + "\n")

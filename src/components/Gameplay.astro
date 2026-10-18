@@ -1,0 +1,249 @@
+---
+// Muted gameplay loops (public/video/<loop>.*); a clip appears once its mp4 exists. Click = big view
+// (the YouTube cut when `youtube` is set, else the loop).
+import fs from "node:fs";
+import { CLIPS } from "../lib/data";
+
+const base = import.meta.env.BASE_URL;
+const clips = CLIPS.filter((c) => fs.existsSync(`public/video/${c.loop}.mp4`));
+const lead = clips[0];
+---
+
+{
+  lead && (
+    <section id="gameplay" class="gameplay">
+      <div class="wrap">
+        <span class="ribbon">Gameplay</span>
+        <h2>Watch it burn</h2>
+        <div class="grid">
+          {clips.map((c, i) => (
+            <button
+              type="button"
+              class:list={["clip", "reveal", { lead: c === lead }]}
+              style={`--d:${(i % 3) * 90}ms`}
+              data-video={`${base}video/${c.loop}`}
+              data-youtube={c.youtube}
+              aria-label={`Play: ${c.title}`}
+            >
+              <span class="screen">
+                <video muted loop playsinline preload="none" poster={`${base}video/${c.loop}.jpg`} data-lazy>
+                  <source data-src={`${base}video/${c.loop}.webm`} type="video/webm" />
+                  <source data-src={`${base}video/${c.loop}.mp4`} type="video/mp4" />
+                </video>
+                <span class="rec hud">REC</span>
+              </span>
+              <span class="cap">
+                <span class="name">{c.title}</span>
+                <span class="blurb">{c.blurb}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<dialog class="lightbox" aria-label="Gameplay">
+  <button type="button" class="close btn" aria-label="Close">X</button>
+  <div class="stage"></div>
+</dialog>
+
+<script>
+  // Autoplay loops only while on screen (saves bandwidth and CPU); sources load lazily.
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        const v = e.target as HTMLVideoElement;
+        if (e.isIntersecting) {
+          if (v.dataset.lazy !== undefined) {
+            v.querySelectorAll<HTMLSourceElement>("source").forEach((s) => (s.src = s.dataset.src!));
+            delete v.dataset.lazy;
+            v.load();
+          }
+          v.play().catch(() => {});
+        } else v.pause();
+      }
+    },
+    { rootMargin: "200px" },
+  );
+  document.querySelectorAll<HTMLVideoElement>(".clip video").forEach((v) => io.observe(v));
+
+  const box = document.querySelector<HTMLDialogElement>(".lightbox")!;
+  const stage = box.querySelector<HTMLElement>(".stage")!;
+  function open(node: HTMLElement) {
+    stage.replaceChildren(node);
+    box.showModal();
+  }
+  box.addEventListener("close", () => stage.replaceChildren());
+  box.querySelector(".close")!.addEventListener("click", () => box.close());
+  box.addEventListener("click", (e) => {
+    if (e.target === box) box.close();
+  });
+
+  document.querySelectorAll<HTMLButtonElement>(".clip").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.dataset.youtube) {
+        const f = document.createElement("iframe");
+        f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.youtube}?autoplay=1&rel=0`;
+        f.allow = "autoplay; fullscreen; picture-in-picture";
+        f.allowFullscreen = true;
+        open(f);
+      } else {
+        const v = document.createElement("video");
+        v.autoplay = v.loop = v.muted = v.playsInline = true;
+        v.controls = true;
+        for (const ext of ["webm", "mp4"]) {
+          const s = document.createElement("source");
+          s.src = `${b.dataset.video}.${ext}`;
+          s.type = `video/${ext}`;
+          v.append(s);
+        }
+        open(v);
+      }
+    }),
+  );
+
+  // Screenshot links (Gallery.astro) open here too.
+  document.querySelectorAll<HTMLAnchorElement>("a[data-shot]").forEach((a) =>
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const img = document.createElement("img");
+      img.src = a.href;
+      img.alt = a.dataset.shot || "";
+      open(img);
+    }),
+  );
+</script>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 28px;
+    margin-top: 48px;
+  }
+
+  .clip {
+    all: unset;
+    display: grid;
+    gap: 14px;
+    cursor: pointer;
+    align-content: start;
+  }
+
+  .clip.lead {
+    grid-column: 1 / -1;
+  }
+
+  .screen {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--deep);
+    border: 3px solid var(--abyss);
+    box-shadow:
+      0 0 0 3px var(--wood-2),
+      0 0 0 6px var(--abyss),
+      10px 12px 0 6px rgb(0 0 0 / 0.35);
+    overflow: hidden;
+    transition: transform 120ms;
+  }
+
+  .clip:hover .screen,
+  .clip:focus-visible .screen {
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 6px var(--abyss),
+      10px 16px 0 6px rgb(0 0 0 / 0.35);
+  }
+
+  .clip:focus-visible {
+    outline: none;
+  }
+
+  .screen video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+
+  .rec {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    color: var(--fire);
+    background: rgb(6 15 26 / 0.7);
+    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rec::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    animation: blink 1.2s steps(2) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .cap {
+    display: grid;
+    gap: 4px;
+  }
+
+  .name {
+    font: 700 1.5rem/1.1 var(--display);
+  }
+
+  .lead .name {
+    font-size: 2rem;
+  }
+
+  .blurb {
+    color: var(--ink-dim);
+  }
+
+
+  .lightbox {
+    padding: 0;
+    border: 0;
+    background: none;
+    width: min(96vw, 1600px);
+    max-height: 96vh;
+    overflow: visible;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(6 15 26 / 0.92);
+  }
+
+  .lightbox .stage :global(video),
+  .lightbox .stage :global(img),
+  .lightbox .stage :global(iframe) {
+    width: 100%;
+    max-height: 90vh;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    border: 0;
+    background: #000;
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  .close {
+    position: absolute;
+    top: -70px;
+    right: 0;
+    min-height: 0;
+  }
+</style>

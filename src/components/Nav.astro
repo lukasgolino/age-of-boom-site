@@ -1,0 +1,206 @@
+---
+// Sticky top bar: logo, section links, music toggle (the game's shanty), Steam.
+import { STEAM_URL } from "../lib/data";
+const base = import.meta.env.BASE_URL;
+const links = [
+  ["Gameplay", "#gameplay"],
+  ["Play", "#play"],
+  ["Fleet", "#fleet"],
+  ["Modes", "#modes"],
+];
+---
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap bar">
+    <a class="logo hud" href="#top" aria-label="Age of Boom, back to top">
+      <img src={`${base}favicon.png`} alt="" width="32" height="32" class="icon" />
+      <span>AGE OF <b>BOOM</b></span>
+    </a>
+    <ul class="links hud">
+      {links.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
+    </ul>
+    <div class="right">
+      <button type="button" class="music hud" aria-pressed="false" data-base={base} title="Play the game's sea shanty">
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="label">Music</span>
+      </button>
+      {
+        STEAM_URL ? (
+          <a class="btn primary steam" href={STEAM_URL}>Wishlist</a>
+        ) : (
+          <span class="btn primary steam" aria-disabled="true">Soon on Steam</span>
+        )
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  const nav = document.querySelector<HTMLElement>(".nav")!;
+  const onScroll = () => nav.classList.toggle("solid", window.scrollY > 40);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // Gapless loop through Web Audio (an <audio loop> clicks at the seam).
+  const btn = nav.querySelector<HTMLButtonElement>(".music")!;
+  let ctx: AudioContext | null = null;
+  let gain: GainNode | null = null;
+  let started = false;
+  async function start() {
+    ctx = new AudioContext();
+    gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    const probe = document.createElement("audio");
+    const ext = probe.canPlayType('audio/ogg; codecs="opus"') ? "ogg" : "mp3";
+    const data = await (await fetch(`${btn.dataset.base}audio/shanty.${ext}`)).arrayBuffer();
+    const buf = await ctx.decodeAudioData(data);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.connect(gain);
+    src.start();
+    started = true;
+  }
+  btn.addEventListener("click", async () => {
+    const on = btn.getAttribute("aria-pressed") !== "true";
+    btn.setAttribute("aria-pressed", String(on));
+    if (on && !started) await start();
+    if (!ctx || !gain) return;
+    if (on) await ctx.resume();
+    gain.gain.cancelScheduledValues(ctx.currentTime);
+    gain.gain.setTargetAtTime(on ? 0.55 : 0, ctx.currentTime, 0.15);
+  });
+</script>
+
+<style>
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    transition: background 200ms, box-shadow 200ms;
+  }
+
+  .nav.solid {
+    background: rgb(6 15 26 / 0.92);
+    box-shadow: 0 3px 0 rgb(0 0 0 / 0.4);
+    backdrop-filter: blur(6px);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 76px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logo b {
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .links a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .links a:hover {
+    color: var(--gold);
+  }
+
+  .right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .music {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 0;
+    color: var(--ink-dim);
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 8px;
+  }
+
+  .music:hover,
+  .music[aria-pressed="true"] {
+    color: var(--gold);
+  }
+
+  .eq {
+    display: flex;
+    align-items: end;
+    gap: 3px;
+    height: 16px;
+  }
+
+  .eq i {
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+  }
+
+  .music[aria-pressed="true"] .eq i {
+    animation: eq 0.6s steps(4) infinite alternate;
+  }
+
+  .music[aria-pressed="true"] .eq i:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+
+  .music[aria-pressed="true"] .eq i:nth-child(3) {
+    animation-delay: -0.45s;
+  }
+
+  @keyframes eq {
+    to {
+      height: 16px;
+    }
+  }
+
+  .steam {
+    min-height: 0;
+    font-size: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .links {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .steam,
+    .music .label {
+      display: none;
+    }
+
+    .bar {
+      height: 60px;
+    }
+  }
+</style>
