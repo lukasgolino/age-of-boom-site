@@ -312,6 +312,12 @@ const hasVideo = fs.existsSync("public/video/loop_galleons.mp4");
       display: none;
     }
 
+    .boom :global(.blast) {
+      transform: scale(0.5);
+      transform-origin: top right;
+      right: -0.1em;
+    }
+
     .shade {
       background: linear-gradient(to bottom, rgb(6 15 26 / 0.55), rgb(6 15 26 / 0.85) 50%, var(--abyss));
     }

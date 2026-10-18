@@ -5,8 +5,8 @@ import spriteData from "../lib/sprites.json";
 type Meta = { w: number; h: number; frames?: number; fps?: number; loop?: boolean; headings?: number; sinking?: { frames: number; fps: number } };
 const META = spriteData as Record<string, Meta>;
 
-const W = 480; // internal resolution (16:9)
-const H = 270;
+const W = 384; // internal resolution (16:9)
+const H = 216;
 const STEP = 1 / 60;
 const TAU = Math.PI * 2;
 const G = 300; // cannonball gravity, px/s^2
