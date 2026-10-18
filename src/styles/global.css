@@ -163,7 +163,7 @@ a:focus-visible {
 /* Animated water: the game's own water tile, scaled 3x. */
 .water {
   background-color: var(--sea);
-  background-image: url("/sprites/water.png");
+  background-image: var(--water-tile);
   background-size: 384px 384px;
   image-rendering: pixelated;
   animation: drift 60s linear infinite;
