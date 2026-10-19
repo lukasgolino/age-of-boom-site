@@ -44,7 +44,7 @@ const links = [
   const btn = nav.querySelector<HTMLButtonElement>(".music")!;
   let ctx: AudioContext | null = null;
   let gain: GainNode | null = null;
-  let started = false;
+  let loading: Promise<void> | null = null;
   async function start() {
     ctx = new AudioContext();
     gain = ctx.createGain();
@@ -52,20 +52,30 @@ const links = [
     gain.connect(ctx.destination);
     const probe = document.createElement("audio");
     const ext = probe.canPlayType('audio/ogg; codecs="opus"') ? "ogg" : "mp3";
-    const data = await (await fetch(`${btn.dataset.base}audio/shanty.${ext}`)).arrayBuffer();
-    const buf = await ctx.decodeAudioData(data);
+    const res = await fetch(`${btn.dataset.base}audio/shanty.${ext}`);
+    if (!res.ok) throw new Error(`shanty: HTTP ${res.status}`);
+    const buf = await ctx.decodeAudioData(await res.arrayBuffer());
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.loop = true;
     src.connect(gain);
     src.start();
-    started = true;
   }
   btn.addEventListener("click", async () => {
-    const on = btn.getAttribute("aria-pressed") !== "true";
-    btn.setAttribute("aria-pressed", String(on));
-    if (on && !started) await start();
+    btn.setAttribute("aria-pressed", String(btn.getAttribute("aria-pressed") !== "true"));
+    try {
+      await (loading ??= start());
+    } catch (err) {
+      // Failed load: reset so the next click retries.
+      console.error(err);
+      void ctx?.close();
+      ctx = gain = loading = null;
+      btn.setAttribute("aria-pressed", "false");
+      return;
+    }
     if (!ctx || !gain) return;
+    // Read the state after the await: clicks during the first load must not leave the button and the sound out of sync.
+    const on = btn.getAttribute("aria-pressed") === "true";
     if (on) await ctx.resume();
     gain.gain.cancelScheduledValues(ctx.currentTime);
     gain.gain.setTargetAtTime(on ? 0.55 : 0, ctx.currentTime, 0.15);

@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 
-// SITE_URL / SITE_BASE come from the deploy setup (hosting not chosen yet).
+// Hosted on GitHub Pages at ageofboom.online; the deploy workflow passes SITE_URL / SITE_BASE from configure-pages.
 export default defineConfig({
   site: process.env.SITE_URL || "https://ageofboom.online",
   base: process.env.SITE_BASE || "/",

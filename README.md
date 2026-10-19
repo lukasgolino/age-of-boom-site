@@ -1,11 +1,12 @@
 # Age of Boom website
 
-One-page static Astro site for [Age of Boom](../age-of-boom). No backend.
+One-page static Astro site for Age of Boom (game repo: `../age-of-boom`). No backend. Live at https://ageofboom.online (GitHub Pages, deployed by `.github/workflows/deploy.yml` on every push to `main`).
 
 ```sh
 npm ci
 npm run dev        # http://localhost:4321
-npm run build      # -> dist/ (deploy this folder anywhere static)
+npm run build      # -> dist/
+npm run check      # astro check (types)
 ```
 
 - Copy and numbers: `src/lib/data.ts` (Steam URL, social links, YouTube ids, ships, ammo, modes).
