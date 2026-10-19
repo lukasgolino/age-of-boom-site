@@ -99,7 +99,7 @@ export interface Mode {
 }
 
 export const MODES: Mode[] = [
-  { name: "Deathmatch", tag: "Online · up to 4", text: "Pick a fully rigged ship, hunt the others, first to the kill limit wins. Fill empty seats with bots. Join by room code, no port forwarding." },
+  { name: "Deathmatch", tag: "Online · up to 4", text: "Pick a fully rigged ship, hunt the others, first to the kill limit wins. Host for your mates and fill empty seats with bots." },
   { name: "Co-op Last Stand", tag: "Online · up to 4", text: "Hold the port together against growing raider waves, with a boss galleon every fifth wave. Split the gold by damage dealt." },
   { name: "Last Stand", tag: "Solo", text: "One port, endless waves, a shop between rounds. Chase your best score on the leaderboard." },
   { name: "Open sea", tag: "Solo", text: "Islands, ports, pirates and fat merchant hulls. Plunder, upgrade, and climb from sloop to galleon." },
