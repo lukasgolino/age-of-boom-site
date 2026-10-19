@@ -10,9 +10,6 @@ import Shipyard from "../components/Shipyard.astro";
 import { AMMO, LINKS, MODES, PAGAN_URL, SEA, STEAM_URL } from "../lib/data";
 
 const base = import.meta.env.BASE_URL;
-// The playable toy (Toy.astro) is optional so the page builds without it.
-const toyModule = Object.values(import.meta.glob<{ default: unknown }>("../components/Toy.astro", { eager: true }))[0];
-const Toy = toyModule?.default as any;
 const icon = (n: string) => `${base}sprites/ui/icon_${n}.png`;
 const featLoop = (id: string) => fs.existsSync(`public/video/feat/${id}.mp4`);
 // Sea section: the night and arctic loops, if recorded.
@@ -51,27 +48,6 @@ const seaLoops = [
     </section>
 
     <Gameplay />
-
-    {
-      Toy && (
-        <section id="play" class="play water">
-          <div class="veil" />
-          <div class="wrap play-inner">
-            <div class="play-copy">
-              <span class="ribbon">Try it</span>
-              <h2>Take the helm</h2>
-              <p class="lede">
-                A taste of the broadside game, right here. Turn your beam to the enemy, fire, and come about before they
-                return the favour. The real thing has wind, fog, four ammo types and three more hulls.
-              </p>
-            </div>
-            <div class="panel toy-panel">
-              <Toy />
-            </div>
-          </div>
-        </section>
-      )
-    }
 
     <section id="fleet" class="fleet">
       <div class="wrap">
@@ -249,7 +225,6 @@ const seaLoops = [
     pointer-events: none;
   }
 
-  .play .wrap,
   .modes .wrap,
   .final .wrap {
     position: relative;
@@ -279,20 +254,6 @@ const seaLoops = [
   .txt,
   .sea-list p {
     color: var(--ink-dim);
-  }
-
-  /* Play */
-  .play-inner {
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
-    gap: 48px;
-    align-items: center;
-  }
-
-  @media (max-width: 960px) {
-    .play-inner {
-      grid-template-columns: 1fr;
-    }
   }
 
   /* Arsenal */
