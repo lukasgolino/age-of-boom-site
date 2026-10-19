@@ -43,9 +43,7 @@ const hasVideo = fs.existsSync("public/video/loop_galleons.mp4");
     </div>
   </div>
 
-  <a class="scroll hud" href="#gameplay" aria-label="Scroll to gameplay">
-    <Sprite name="gull" scale={3} />
-  </a>
+  <a class="scroll" href="#gameplay" aria-label="Scroll to gameplay"><span></span></a>
 </header>
 
 <script>
@@ -290,8 +288,26 @@ const hasVideo = fs.existsSync("public/video/loop_galleons.mp4");
     position: absolute;
     left: 50%;
     bottom: 28px;
+    width: 30px;
+    height: 24px;
     transform: translateX(-50%);
-    animation: bob 2.4s ease-in-out infinite;
+    animation: bob 2.4s steps(6) infinite;
+  }
+
+  /* A 5x4 pixel chevron, 6px pixels. */
+  .scroll span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 6px;
+    height: 6px;
+    color: var(--gold);
+    background: currentColor;
+    box-shadow:
+      24px 0 0 currentColor,
+      6px 6px 0 currentColor,
+      18px 6px 0 currentColor,
+      12px 12px 0 currentColor;
   }
 
   @keyframes bob {

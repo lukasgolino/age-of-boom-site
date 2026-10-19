@@ -160,8 +160,16 @@ const links = [
 
   .eq i {
     width: 4px;
-    height: 4px;
+    height: 8px;
     background: currentColor;
+  }
+
+  .eq i:nth-child(2) {
+    height: 14px;
+  }
+
+  .eq i:nth-child(3) {
+    height: 4px;
   }
 
   .music[aria-pressed="true"] .eq i {
@@ -177,6 +185,9 @@ const links = [
   }
 
   @keyframes eq {
+    from {
+      height: 2px;
+    }
     to {
       height: 16px;
     }

@@ -105,7 +105,7 @@ p {
 
 section {
   position: relative;
-  padding: clamp(80px, 11vw, 150px) 0;
+  padding: clamp(72px, 9vw, 120px) 0;
 }
 
 /* The game's HUD font (font_small, 5x7 on an 8px em). Crisp at multiples of 8px. */
