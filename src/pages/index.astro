@@ -14,11 +14,12 @@ const base = import.meta.env.BASE_URL;
 const toyModule = Object.values(import.meta.glob<{ default: unknown }>("../components/Toy.astro", { eager: true }))[0];
 const Toy = toyModule?.default as any;
 const icon = (n: string) => `${base}sprites/ui/icon_${n}.png`;
-// Sea section art: the first night and arctic screenshots, if recorded.
-const shotFiles = fs.existsSync("public/img/shots") ? fs.readdirSync("public/img/shots").sort() : [];
-const seaShots = ["night", "arctic"]
-  .map((k) => shotFiles.find((f) => f.includes(k)))
-  .filter((f): f is string => !!f);
+const featLoop = (id: string) => fs.existsSync(`public/video/feat/${id}.mp4`);
+// Sea section: the night and arctic loops, if recorded.
+const seaLoops = [
+  { loop: "loop_night", label: "Night action" },
+  { loop: "loop_arctic", label: "Arctic waters" },
+].filter((l) => fs.existsSync(`public/video/${l.loop}.mp4`));
 ---
 
 <Base
@@ -92,6 +93,12 @@ const seaShots = ["night", "arctic"]
           {
             AMMO.map((a, i) => (
               <article class="panel reveal" style={`--d:${i * 80}ms`}>
+                {featLoop(a.id) && (
+                  <video class="feat" muted loop playsinline preload="none" data-lazy poster={`${base}video/feat/${a.id}.jpg`}>
+                    <source data-src={`${base}video/feat/${a.id}.webm`} type="video/webm" />
+                    <source data-src={`${base}video/feat/${a.id}.mp4`} type="video/mp4" />
+                  </video>
+                )}
                 <img class="ammo-icon" src={icon(a.sprite)} alt="" width="16" height="16" />
                 <h3>{a.name}</h3>
                 <p class="hud stats">
@@ -102,6 +109,24 @@ const seaShots = ["night", "arctic"]
             ))
           }
         </div>
+        {
+          featLoop("magazine") && (
+            <article class="panel magazine reveal">
+              <video class="feat" muted loop playsinline preload="none" data-lazy poster={`${base}video/feat/magazine.jpg`}>
+                <source data-src={`${base}video/feat/magazine.webm`} type="video/webm" />
+                <source data-src={`${base}video/feat/magazine.mp4`} type="video/mp4" />
+              </video>
+              <div class="mag-copy">
+                <p class="hud tag">Powder magazine</p>
+                <h3>And sometimes, boom.</h3>
+                <p class="txt">
+                  A ship sunk under fire can blow its magazine: a fireball, a shockwave and burning debris that hurt everything
+                  nearby, and can set off the next ship's magazine too. Fire shot makes it far more likely.
+                </p>
+              </div>
+            </article>
+          )
+        }
         <ul class="extras hud">
           <li><img class="icon" src={icon("cannon")} alt="" />Bow chasers</li>
           <li><img class="icon" src={icon("reload")} alt="" />Swivel guns</li>
@@ -150,17 +175,19 @@ const seaShots = ["night", "arctic"]
             ))
           }
         </ul>
-        {
-          seaShots.length > 0 && (
-            <div class="sea-shots">
-              {seaShots.map((f, i) => (
-                <a class="sea-shot reveal" style={`--d:${i * 120}ms`} href={`${base}img/shots/${f}`} data-shot={f.replace(/\.\w+$/, "").replace(/_/g, " ")}>
-                  <img src={`${base}img/shots/${f}`} alt={f.replace(/\.\w+$/, "").replace(/_/g, " ")} loading="lazy" width="1920" height="1080" />
-                </a>
-              ))}
-            </div>
-          )
-        }
+        <div class="sea-shots">
+          {
+            seaLoops.map((l, i) => (
+              <figure class="sea-shot reveal" style={`--d:${i * 120}ms`}>
+                <video muted loop playsinline preload="none" data-lazy poster={`${base}video/${l.loop}.jpg`}>
+                  <source data-src={`${base}video/${l.loop}.webm`} type="video/webm" />
+                  <source data-src={`${base}video/${l.loop}.mp4`} type="video/mp4" />
+                </video>
+                <figcaption class="hud">{l.label}</figcaption>
+              </figure>
+            ))
+          }
+        </div>
       </div>
     </section>
 
@@ -271,7 +298,7 @@ const seaShots = ["night", "arctic"]
   /* Arsenal */
   .ammo {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
     gap: 36px;
     margin: 48px 0;
   }
@@ -282,6 +309,24 @@ const seaShots = ["night", "arctic"]
     gap: 10px;
     align-content: start;
     padding: 8px 4px;
+  }
+
+  .feat {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    image-rendering: pixelated;
+    box-shadow: 0 0 0 3px var(--abyss);
+    margin-bottom: 4px;
+  }
+
+  .feat + .ammo-icon {
+    width: 48px;
+    height: 48px;
+    margin-top: -36px;
+    margin-left: 8px;
+    position: relative;
+    filter: drop-shadow(2px 2px 0 var(--abyss));
   }
 
   .ammo-icon {
@@ -298,6 +343,29 @@ const seaShots = ["night", "arctic"]
     color: var(--gold);
     font-weight: 400;
     margin-right: 12px;
+  }
+
+  .magazine {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+    margin-bottom: 48px;
+  }
+
+  .mag-copy {
+    display: grid;
+    gap: 10px;
+  }
+
+  .mag-copy h3 {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 760px) {
+    .magazine {
+      grid-template-columns: 1fr;
+    }
   }
 
   .extras {
@@ -384,6 +452,7 @@ const seaShots = ["night", "arctic"]
 
   .sea-shot {
     display: block;
+    margin: 0;
     border: 3px solid var(--abyss);
     box-shadow:
       0 0 0 3px var(--wood-2),
@@ -396,12 +465,25 @@ const seaShots = ["night", "arctic"]
     margin-top: 48px;
   }
 
-  .sea-shot img {
+  .sea-shot {
+    margin: 0;
+    position: relative;
+  }
+
+  .sea-shot video {
     width: 100%;
-    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     image-rendering: pixelated;
+  }
+
+  .sea-shot figcaption {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    background: rgb(6 15 26 / 0.75);
+    padding: 2px 10px;
+    text-transform: uppercase;
   }
 
   /* PAGAN */

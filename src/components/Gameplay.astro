@@ -50,25 +50,6 @@ const lead = clips[0];
 </dialog>
 
 <script>
-  // Autoplay loops only while on screen (saves bandwidth and CPU); sources load lazily.
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        const v = e.target as HTMLVideoElement;
-        if (e.isIntersecting) {
-          if (v.dataset.lazy !== undefined) {
-            v.querySelectorAll<HTMLSourceElement>("source").forEach((s) => (s.src = s.dataset.src!));
-            delete v.dataset.lazy;
-            v.load();
-          }
-          v.play().catch(() => {});
-        } else v.pause();
-      }
-    },
-    { rootMargin: "200px" },
-  );
-  document.querySelectorAll<HTMLVideoElement>(".clip video").forEach((v) => io.observe(v));
-
   const box = document.querySelector<HTMLDialogElement>(".lightbox")!;
   const stage = box.querySelector<HTMLElement>(".stage")!;
   function open(node: HTMLElement) {

@@ -39,8 +39,6 @@ export const CLIPS: Clip[] = [
     loop: "loop_sloop",
     youtube: "",
   },
-  { id: "night", title: "Night action", blurb: "Lanterns, fires and muzzle flashes are all that give you away.", loop: "loop_night", youtube: "" },
-  { id: "arctic", title: "Arctic waters", blurb: "Ice floes for cover. Crack them with round shot, or ram.", loop: "loop_arctic", youtube: "" },
   { id: "sinking", title: "Feed the fishes", blurb: "Capsize, bubbles, debris and gold. Every sinking is a show.", loop: "loop_sinking", youtube: "" },
 ];
 

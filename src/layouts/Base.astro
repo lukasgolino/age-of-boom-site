@@ -60,6 +60,25 @@ const fontFace = `@font-face{font-family:"Boom Pixel";src:url(${base}fonts/boom-
         { rootMargin: "0px 0px -8% 0px" },
       );
       document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+      // Muted loops (video[data-lazy], sources in data-src): load when near the viewport, play only while visible.
+      const vio = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const v = e.target as HTMLVideoElement;
+            if (e.isIntersecting) {
+              if (v.dataset.lazy !== undefined) {
+                v.querySelectorAll<HTMLSourceElement>("source[data-src]").forEach((s) => (s.src = s.dataset.src!));
+                delete v.dataset.lazy;
+                v.load();
+              }
+              v.play().catch(() => {});
+            } else v.pause();
+          }
+        },
+        { rootMargin: "300px 0px" },
+      );
+      document.querySelectorAll<HTMLVideoElement>("video[data-lazy], video.lazy-play").forEach((v) => vio.observe(v));
     </script>
   </body>
 </html>

@@ -40,6 +40,9 @@ html {
 
 body {
   margin: 0;
+  /* Pixelify Sans' "fi" ligature reads as "A". */
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
   background: var(--abyss);
   color: var(--ink);
   font: 400 17px/1.6 var(--body);

@@ -10,7 +10,7 @@ const hasVideo = fs.existsSync("public/video/loop_galleons.mp4");
 <header id="top" class="hero water">
   {
     hasVideo && (
-      <video class="bg" autoplay muted loop playsinline preload="auto" poster={`${base}video/loop_galleons.jpg`} aria-hidden="true">
+      <video class="bg lazy-play" autoplay muted loop playsinline preload="auto" poster={`${base}video/loop_galleons.jpg`} aria-hidden="true">
         <source src={`${base}video/loop_galleons.webm`} type="video/webm" />
         <source src={`${base}video/loop_galleons.mp4`} type="video/mp4" />
       </video>
